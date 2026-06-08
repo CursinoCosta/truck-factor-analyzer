@@ -1,0 +1,11 @@
+# Core dependencies
+typer>=0.7.0
+pydriller>=0.40.0
+GitPython>=3.1.0
+
+# Testing
+pytest>=7.0.0
+
+# Optional / future tools (install when available/needed):
+# - GitHub Search Tool (GHS) — install when upstream package name is known
+# - GitEvo — install when upstream package name is known

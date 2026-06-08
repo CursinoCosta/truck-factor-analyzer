@@ -1,0 +1,12 @@
+[project]
+name = "truck-factor-analyzer"
+version = "0.1.0"
+description = "CLI to compute truck factor of git repositories"
+requires-python = ">=3.11"
+dependencies = [
+  "typer>=0.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
