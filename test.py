@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quick test runner for `src.git_loader.load_commits`.
+"""Quick test runner: load commits and print per-author stats.
 
 Usage:
     python test.py /path/to/repo
@@ -7,6 +7,23 @@ Usage:
 Run this from the project root so `from src.git_loader` resolves.
 """
 import sys
+from typing import Iterable
+
+
+def print_author_stats(commits: Iterable[object]) -> None:
+    try:
+        from src.metrics import compute_author_stats
+    except Exception as exc:
+        print("Failed to import compute_author_stats:", exc)
+        return
+
+    stats = compute_author_stats(commits)
+    if not stats:
+        print("No commits found or unable to compute stats.")
+        return
+
+    for author, count in sorted(stats.items(), key=lambda x: -x[1]):
+        print(f"{author}: {count}")
 
 
 def main() -> int:
@@ -29,12 +46,7 @@ def main() -> int:
         print("Error while loading commits:", exc)
         return 3
 
-    for c in commits:
-        print(f"{c.commit_hash} | {c.author} | {len(c.modified_files)} files")
-        for f in c.modified_files:
-            print("  ", f)
-
-    print(f"Total commits: {len(commits)}")
+    print_author_stats(commits)
     return 0
 
 
