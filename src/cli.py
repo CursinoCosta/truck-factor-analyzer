@@ -5,6 +5,12 @@ app = typer.Typer(help="Truck Factor Analyzer CLI")
 
 
 @app.command()
+def analyze(repo_path: str = typer.Option(..., "--repo-path", help="Path to the git repository to analyze")) -> None:
+    """Analyze a repository (placeholder)."""
+    typer.echo(f"Analyzing repository: {repo_path}")
+
+
+@app.command()
 def info(version: Optional[bool] = typer.Option(False, "--version", "-v", help="Show version")) -> None:
     """Show basic info about the CLI (placeholder)."""
     if version:
