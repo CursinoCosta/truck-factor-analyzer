@@ -19,6 +19,10 @@ class CommitInfo:
     commit_hash: str
     modified_files: List[str]
 
+    def __post_init__(self):
+        if not self.author:
+            self.author = "<unknown>"
+
 
 def load_commits(repo_path: str) -> List[CommitInfo]:
     """Traverse all commits in `repo_path` and return a list of CommitInfo.
