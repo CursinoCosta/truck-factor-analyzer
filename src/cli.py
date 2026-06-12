@@ -1,4 +1,5 @@
 from typing import Optional
+from pathlib import Path
 import typer
 
 app = typer.Typer(help="Truck Factor Analyzer CLI")
@@ -7,8 +8,7 @@ app = typer.Typer(help="Truck Factor Analyzer CLI")
 @app.command()
 def analyze(repo_path: str = typer.Option(..., "--repo-path", help="Path to the git repository to analyze")) -> None:
     """Analyze a repository (placeholder)."""
-    from pathlib import Path
-
+    
     repo = Path(repo_path)
     if not repo.exists():
         typer.echo(f"Error: path does not exist: {repo_path}")
