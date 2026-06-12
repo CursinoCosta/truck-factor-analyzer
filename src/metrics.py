@@ -18,15 +18,17 @@ def compute_author_stats(commits: Iterable[object]) -> Dict[str, int]:
     Returns:
         A dict mapping author name to number of commits.
     """
-    names = []
-    for c in commits:
-        name = getattr(c, "author", None)
-        # If author is an object with a `name` attribute (e.g. PyDriller Developer)
-        if name and not isinstance(name, str):
-            name = getattr(name, "name", None)
-        if not name:
-            name = "<unknown>"
-        names.append(name)
+    return dict(
+        Counter(
+            getattr(
+                getattr(c, "author", None),
+                "name",
+                None
+            ) or "<unknown>"
+            for c in commits
+        )
+    )
 
-    return dict(Counter(names))
+
+
 
