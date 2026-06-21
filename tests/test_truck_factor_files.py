@@ -106,3 +106,22 @@ class TestGreedyHeuristic:
         # threshold 0.1 
         result = calculate_truck_factor_files(commits, coverage_threshold=0.1)
         assert isinstance(result.critical_authors, list)
+
+    def test_tf_zero_quando_threshold_impossivel(self):
+        """
+        coverage_threshold=1.1 nunca é atingível (cobertura máxima é 1.0).
+        O laço não remove ninguém: TF deve ser 0.
+        """
+        commits = [
+            _commit("alice", ["a.py"]),
+            _commit("bob",   ["b.py"]),
+        ]
+        result = calculate_truck_factor_files(commits, coverage_threshold=1.1)
+        assert result.truck_factor == 0
+        assert result.critical_authors == []
+
+    def test_tf_zero_para_lista_vazia(self):
+        result = calculate_truck_factor_files([], coverage_threshold=0.5)
+        assert result.truck_factor == 0
+        assert result.critical_authors == []
+        assert result.coverage_before == 0.0
