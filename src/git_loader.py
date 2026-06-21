@@ -64,8 +64,9 @@ def load_commits(repo_path: str) -> List[CommitInfo]:
         for mod in mods:
             # PyDriller's ModifiedFile exposes new_path / old_path
             path = getattr(mod, "new_path", None) or getattr(mod, "old_path", None)
-            if path:
+            if path and not ignorar_arquivo(path):
                 files.append(path)
+                
         commits.append(CommitInfo(author=author, commit_hash=chash, modified_files=files))
 
     return commits
