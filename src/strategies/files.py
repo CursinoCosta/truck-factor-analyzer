@@ -105,3 +105,20 @@ def _build_authorship_map(
             authorship_map[filepath].add(author)
 
     return authorship_map
+
+def _compute_coverage(
+    active_authors: set[str],
+    authorship_map: dict[str, set[str]],
+) -> float:
+    """
+    Fração de arquivos que possuem ao menos um autor primário
+    dentro do conjunto active_authors. Retorna 0.0 se sem arquivos.
+    """
+    total = len(authorship_map)
+    if total == 0:
+        return 0.0
+    covered = sum(
+        1 for owners in authorship_map.values()
+        if owners & active_authors 
+    )
+    return covered / total
