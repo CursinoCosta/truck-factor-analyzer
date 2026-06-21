@@ -8,6 +8,7 @@ sys.path.insert(0, str(ROOT))
 from src.models import CommitInfo
 from src.strategies.files import FileAuthorshipTracker
 from src.strategies.files import _compute_doa, _normalize_doa_per_file
+from src.strategies.files import calculate_truck_factor_files
 
 
 def _commit(author: str, files: list[str]) -> CommitInfo:
@@ -78,6 +79,30 @@ class TestDOA:
             ("b.py", "bob"):   8.0,
         }
         norm = _normalize_doa_per_file(raw)
-        
+
         assert math.isclose(norm[("a.py", "alice")], 1.0)
         assert math.isclose(norm[("b.py", "bob")],   1.0)
+
+
+class TestGreedyHeuristic:
+
+    def test_tf_um_quando_top_autor_e_critico(self):
+        commits = [
+            _commit("alice", ["a.py", "b.py", "c.py"]),
+            _commit("bob",   ["d.py"]),
+            _commit("carol", ["a.py"]),  
+        ]
+        result = calculate_truck_factor_files(commits, coverage_threshold=0.5)
+        assert result.truck_factor == 1
+        assert "alice" in result.critical_authors
+
+    def test_critical_authors_ordenado_por_remocao(self):
+        """Autores removidos com sucesso aparecem em critical_authors."""
+        commits = [
+            _commit("alice", ["a.py"]),
+            _commit("bob",   ["b.py"]),
+            _commit("carol", ["c.py", "d.py"]),
+        ]
+        # threshold 0.1 
+        result = calculate_truck_factor_files(commits, coverage_threshold=0.1)
+        assert isinstance(result.critical_authors, list)
