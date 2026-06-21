@@ -7,11 +7,12 @@ from dataclasses import dataclass
 from typing import List
 from pathlib import Path
 
-# PyDriller changed its public API across versions; prefer `Repository` when available.
 try:
-    from pydriller import Repository  # type: ignore
-except Exception:
-    from pydriller.repository import Repository  # type: ignore
+    # Tenta importar a API nova (PyDriller 2.0 ou superior)
+    from pydriller import Repository # type: ignore
+except ImportError:
+    # Se falhar, faz o fallback seguro importando a classe antiga e apelidando de Repository
+    from pydriller import RepositoryMining as Repository # type: ignore
 
 # Conjuntos de exclusão
 IGNORED_EXTENSIONS = {
