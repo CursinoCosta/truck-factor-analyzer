@@ -28,12 +28,15 @@ IGNORED_DIRECTORIES = {
 @dataclass
 class CommitInfo:
     author: str
+    email: str
     commit_hash: str
     modified_files: List[str]
 
     def __post_init__(self):
         if not self.author:
             self.author = "<unknown>"
+        if not self.email:
+            self.email = "<unknown>"
 
 def ignorar_arquivo(file_path: str) -> bool:
     """Verifica se um arquivo deve ser ignorado na análise."""
@@ -59,6 +62,7 @@ def load_commits(repo_path: str) -> List[CommitInfo]:
     commits: List[CommitInfo] = []
     for commit in Repository(repo_path).traverse_commits():
         author = commit.author.name if commit.author and commit.author.name else "<unknown>"
+        email = commit.author.email if commit.author and commit.author.email else "<unknown>"
         chash = commit.hash
         files: List[str] = []
         mods = getattr(commit, "modified_files", None) or getattr(commit, "modifications", [])
@@ -67,7 +71,7 @@ def load_commits(repo_path: str) -> List[CommitInfo]:
             path = getattr(mod, "new_path", None) or getattr(mod, "old_path", None)
             if path and not ignorar_arquivo(path):
                 files.append(path)
-                
-        commits.append(CommitInfo(author=author, commit_hash=chash, modified_files=files))
+        if files:
+            commits.append(CommitInfo(author=author, email=email, commit_hash=chash, modified_files=files))
 
     return commits
