@@ -122,3 +122,61 @@ def _compute_coverage(
         if owners & active_authors 
     )
     return covered / total
+
+@dataclass
+class FileTruckFactorResult:
+    truck_factor: int
+    critical_authors: List[str]  # autores removidos até atingir o limite
+    coverage_before: float       # cobertura com equipe completa
+    coverage_threshold: float
+
+
+def calculate_truck_factor_files(
+    commits: List[CommitInfo],
+    coverage_threshold: float = 0.5,
+) -> FileTruckFactorResult:
+    """
+    Calcula o Truck Factor pela heurística DOA
+
+    Remove iterativamente o autor com mais arquivos únicos sob sua autoria
+    enquanto a cobertura restante ainda >= coverage_threshold.
+    O número de remoções é o Truck Factor.
+    """
+    tracker = FileAuthorshipTracker()
+    tracker.process_commits(commits)
+    authorship_map = _build_authorship_map(tracker)
+
+    active_authors: set[str] = set(tracker.fa.values()) | {
+        a for (_, a) in tracker.dl.keys()
+    }
+    coverage_before = _compute_coverage(active_authors, authorship_map)
+
+    truck_factor = 0
+    critical_authors: List[str] = []
+
+    while active_authors:
+        if _compute_coverage(active_authors, authorship_map) < coverage_threshold:
+            break
+
+        def unique_files(author: str) -> int:
+            return sum(
+                1 for owners in authorship_map.values()
+                if owners == {author}
+            )
+
+        candidate = max(active_authors, key=unique_files)
+        remaining = active_authors - {candidate}
+
+        if _compute_coverage(remaining, authorship_map) < coverage_threshold:
+            break
+
+        active_authors = remaining
+        critical_authors.append(candidate)
+        truck_factor += 1
+
+    return FileTruckFactorResult(
+        truck_factor=truck_factor,
+        critical_authors=critical_authors,
+        coverage_before=coverage_before,
+        coverage_threshold=coverage_threshold,
+    )
