@@ -5,6 +5,7 @@ information from a local git repository using PyDriller.
 """
 from dataclasses import dataclass
 from typing import List
+from pathlib import Path
 
 # PyDriller changed its public API across versions; prefer `Repository` when available.
 try:
@@ -12,6 +13,16 @@ try:
 except Exception:
     from pydriller.repository import Repository  # type: ignore
 
+# Conjuntos de exclusão
+IGNORED_EXTENSIONS = {
+    ".md", ".txt", ".json", ".xml", ".yml", ".yaml", ".csv", 
+    ".png", ".jpg", ".jpeg", ".gif", ".svg", ".lock"
+}
+
+IGNORED_DIRECTORIES = {
+    "node_modules", "vendor", "venv", ".venv", "env", 
+    "dist", "build", "target", "out", "site-packages"
+}
 
 @dataclass
 class CommitInfo:
@@ -22,6 +33,20 @@ class CommitInfo:
     def __post_init__(self):
         if not self.author:
             self.author = "<unknown>"
+
+def ignorar_arquivo(file_path: str) -> bool:
+    """Verifica se um arquivo deve ser ignorado na análise."""
+    path = Path(file_path)
+    
+    # Verifica a extensão
+    if path.suffix.lower() in IGNORED_EXTENSIONS:
+        return True
+        
+    # Verifica se alguma das pastas no caminho está na lista de ignoradas
+    if any(part in IGNORED_DIRECTORIES for part in path.parts):
+        return True
+        
+    return False
 
 
 def load_commits(repo_path: str) -> List[CommitInfo]:
