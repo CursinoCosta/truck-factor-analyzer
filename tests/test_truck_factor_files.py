@@ -40,3 +40,14 @@ class TestFileAuthorshipTracker:
         ])
         assert tracker.dl[("src/foo.py", "alice")] == 2
         assert tracker.dl[("src/foo.py", "bob")]   == 1
+
+    def test_fa_nao_muda_com_edicoes_de_outros_autores(self):
+        tracker = FileAuthorshipTracker()
+        tracker.process_commits([
+            _commit("alice", ["src/bar.py"]),
+            _commit("bob",   ["src/bar.py"]),
+            _commit("carol", ["src/bar.py"]),
+        ])
+        assert tracker.fa["src/bar.py"] == "alice"
+        assert tracker.ac[("src/bar.py", "alice")] == 2
+        assert tracker.ac[("src/bar.py", "bob")] == 0
