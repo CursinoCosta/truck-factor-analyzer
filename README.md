@@ -25,11 +25,16 @@ A ferramenta utiliza técnicas de mineração de repositórios para analisar o h
 
 ### Commit-Based
 
-Calcula o Truck Factor com base na distribuição de commits por desenvolvedor.
+Calcula o Truck Factor com base na distribuição de commits. Os desenvolvedores são ordenados pelo volume de contribuição, e a heurística contabiliza o número mínimo de autores cuja remoção faz com que a soma de seus commits represente mais de 50% do total de modificações do repositório. É uma métrica direta de volume de trabalho.
 
 ### File-Based Ownership
 
-Calcula o Truck Factor com base na propriedade dos arquivos e módulos do sistema, considerando a participação dos desenvolvedores nas modificações realizadas ao longo da evolução do projeto.
+Calcula o Truck Factor com base na métrica *Degree-of-Authorship* (DOA), fundamentada em heurísticas acadêmicas (Avelino et al., 2016). O processo é dividido nas seguintes etapas:
+
+* **Higienização e Filtragem:** Exclusão de arquivos que distorcem o conhecimento central do sistema, como bibliotecas de terceiros (`node_modules`, `vendor`), documentações e arquivos de mídia.
+* **Resolução de Aliases:** Unificação de desenvolvedores com múltiplos nomes de usuário ou erros de digitação no Git, utilizando o cruzamento de e-mails e a Distância de Levenshtein.
+* **Mapeamento de Autoria (DOA):** O grau de autoria de cada arquivo considera o criador original (FA - *First Authorship*), o número de entregas realizadas pelo autor (DL - *Deliveries*) e o desgaste causado pelas modificações de terceiros (AC - *Acceptances*).
+* **Heurística de Cobertura:** O algoritmo remove iterativamente os principais autores de código até que a cobertura de arquivos mantidos pelo restante da equipe caia para menos de 50%. A quantidade de desenvolvedores removidos até esse ponto de falha determina o Truck Factor.
 
 ## Tecnologias Utilizadas
 
@@ -55,15 +60,18 @@ A ferramenta realiza a análise dos seguintes artefatos:
 
 ```text
 src/
+├── aliases.py
 ├── cli.py
 ├── git_loader.py
 ├── metrics.py
+├── models.py
 ├── truck_factor.py
 └── strategies/
     ├── commits.py
     └── files.py
 
 tests/
+├── test_aliases.py
 ├── test_loader.py
 ├── test_metrics.py
 ├── test_truck_factor_commits.py
@@ -71,6 +79,7 @@ tests/
 
 .github/workflows/
 └── tests.yml
+
 ```
 
 ## Instalação
@@ -88,6 +97,7 @@ source venv/bin/activate
 venv\Scripts\activate
 
 pip install -r requirements.txt
+
 ```
 
 ## Uso
@@ -96,12 +106,14 @@ Análise utilizando a estratégia baseada em commits:
 
 ```bash
 python -m src.cli analyze --repo-path <repositorio> --strategy commits
+
 ```
 
 Análise utilizando a estratégia baseada em propriedade de arquivos:
 
 ```bash
 python -m src.cli analyze --repo-path <repositorio> --strategy files
+
 ```
 
 ## Testes
@@ -109,7 +121,8 @@ python -m src.cli analyze --repo-path <repositorio> --strategy files
 Para executar os testes localmente:
 
 ```bash
-pytest
+python -m pytest
+
 ```
 
 Os testes são executados automaticamente por meio do GitHub Actions a cada push e pull request.
@@ -117,3 +130,7 @@ Os testes são executados automaticamente por meio do GitHub Actions a cada push
 ## Objetivo Acadêmico
 
 Projeto desenvolvido para a disciplina Engenharia de Software II com foco na aplicação de técnicas de mineração de repositórios para identificação de problemas relacionados à manutenção e evolução de software por meio da análise de Truck Factor.
+
+## Referências
+
+* Avelino, Guilherme, Leonardo Passos, Andre Hora, and Marco Tulio Valente. "A novel approach for estimating truck factors." In *Proceedings of the 24th International Conference on Program Comprehension*, pp. 1-10. 2016. Disponível em: <https://arxiv.org/abs/1604.06766>
