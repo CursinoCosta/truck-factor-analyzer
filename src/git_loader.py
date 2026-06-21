@@ -14,6 +14,8 @@ except ImportError:
     # Se falhar, faz o fallback seguro importando a classe antiga e apelidando de Repository
     from pydriller import RepositoryMining as Repository # type: ignore
 
+from src.aliases import unificar_autores
+
 # Conjuntos de exclusão
 IGNORED_EXTENSIONS = {
     ".md", ".txt", ".json", ".xml", ".yml", ".yaml", ".csv", 
@@ -74,4 +76,5 @@ def load_commits(repo_path: str) -> List[CommitInfo]:
         if files:
             commits.append(CommitInfo(author=author, email=email, commit_hash=chash, modified_files=files))
 
-    return commits
+    commits_limpos = unificar_autores(commits)
+    return commits_limpos
