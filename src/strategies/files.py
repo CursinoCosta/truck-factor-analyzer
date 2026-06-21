@@ -23,10 +23,18 @@ class FileAuthorshipTracker:
     )
 
     def process_commits(self, commits: List[CommitInfo]) -> None:
-        """Itera cronologicamente sobre commits e registra FA, DL e AC."""
-        for commit in commits:
-            author = commit.author
-            for filepath in commit.modified_files:
-                # FA: o primeiro autor que tocou o arquivo é o first author
-                if filepath not in self.fa:
-                    self.fa[filepath] = author
+            """Itera cronologicamente sobre commits e registra FA, DL e AC."""
+            for commit in commits:
+                author = commit.author
+                for filepath in commit.modified_files:
+                    # FA: o primeiro autor que tocou o arquivo é o first author
+                    if filepath not in self.fa:
+                        self.fa[filepath] = author
+
+                    # DL: toda edição desse autor nesse arquivo conta
+                    self.dl[(filepath, author)] += 1
+
+                    # AC: se quem edita NÃO é o first author, incrementa AC do first author
+                    first_author = self.fa[filepath]
+                    if author != first_author:
+                        self.ac[(filepath, first_author)] += 1
