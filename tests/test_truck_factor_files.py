@@ -1,4 +1,5 @@
 import sys
+import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -6,6 +7,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.models import CommitInfo
 from src.strategies.files import FileAuthorshipTracker
+from src.strategies.files import _compute_doa, _normalize_doa_per_file
 
 
 def _commit(author: str, files: list[str]) -> CommitInfo:
@@ -51,3 +53,31 @@ class TestFileAuthorshipTracker:
         assert tracker.fa["src/bar.py"] == "alice"
         assert tracker.ac[("src/bar.py", "alice")] == 2
         assert tracker.ac[("src/bar.py", "bob")] == 0
+
+class TestDOA:
+
+    def test_ac_zero_nao_levanta_excecao(self):
+        score = _compute_doa(fa=1, dl=5, ac=0)
+        assert math.isclose(score, 3.293 + 1.098 + 0.164 * 5, rel_tol=1e-6)
+
+    def test_first_author_tem_score_maior(self):
+        assert _compute_doa(fa=1, dl=3, ac=0) > _compute_doa(fa=0, dl=3, ac=0)
+
+    def test_ac_alto_reduz_score(self):
+        assert _compute_doa(fa=1, dl=5, ac=100) < _compute_doa(fa=1, dl=5, ac=1)
+
+    def test_normalizacao_maximo_vira_um(self):
+        raw = {("foo.py", "alice"): 5.0, ("foo.py", "bob"): 2.5}
+        norm = _normalize_doa_per_file(raw)
+        assert math.isclose(norm[("foo.py", "alice")], 1.0)
+        assert math.isclose(norm[("foo.py", "bob")],   0.5)
+
+    def test_normalizacao_isolada_por_arquivo(self):
+        raw = {
+            ("a.py", "alice"): 4.0,
+            ("b.py", "bob"):   8.0,
+        }
+        norm = _normalize_doa_per_file(raw)
+        
+        assert math.isclose(norm[("a.py", "alice")], 1.0)
+        assert math.isclose(norm[("b.py", "bob")],   1.0)
