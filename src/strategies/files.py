@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import DefaultDict, List
@@ -38,3 +39,15 @@ class FileAuthorshipTracker:
                     first_author = self.fa[filepath]
                     if author != first_author:
                         self.ac[(filepath, first_author)] += 1
+
+    def _compute_doa(fa: int, dl: int, ac: int) -> float:
+        """
+        DOA = 3.293 + 1.098*FA + 0.164*DL - 0.321*ln(1 + AC)
+
+        fa: 1 se o dev é first author do arquivo, 0 caso contrário
+        dl: número de edições diretas do dev no arquivo
+        ac: número de edições de terceiros no arquivo (perspectiva do dev)
+
+        max(ac, 0) evita log de negativo; (1 + ac) evita log(0).
+        """
+        return 3.293 + 1.098 * fa + 0.164 * dl - 0.321 * math.log(1 + max(ac, 0))
