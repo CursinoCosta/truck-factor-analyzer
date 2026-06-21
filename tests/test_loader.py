@@ -1,4 +1,10 @@
+import sys
+from pathlib import Path
 import pytest
+
+# Garante que a raiz do projeto esteja no sys.path antes de importar o src
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 from src.git_loader import ignorar_arquivo
 
 def test_extensoes_ignoradas():
