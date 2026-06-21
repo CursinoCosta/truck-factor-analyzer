@@ -71,3 +71,37 @@ def _normalize_doa_per_file(
         for author, score in entries:
             normalized[(filepath, author)] = (score / max_score) if max_score > 0 else 0.0
     return normalized
+
+def _build_authorship_map(
+    tracker: FileAuthorshipTracker,
+    threshold: float = PRIMARY_AUTHOR_THRESHOLD,
+) -> dict[str, set[str]]:
+    """
+    Retorna {filepath -> conjunto de autores primários}.
+    Um autor é primário se seu DOA normalizado >= threshold.
+    """
+    all_files = set(tracker.fa.keys())
+    # todos os autores que aparecem como first author ou fizeram ao menos 1 DL
+    all_authors: set[str] = set(tracker.fa.values()) | {
+        author for (_, author) in tracker.dl.keys()
+    }
+
+    raw: dict[tuple[str, str], float] = {}
+    for filepath in all_files:
+        first_author = tracker.fa[filepath]
+        for author in all_authors:
+            dl_val = tracker.dl[(filepath, author)]
+            ac_val = tracker.ac[(filepath, author)]
+            fa_val = 1 if author == first_author else 0
+            # só calcula DOA se o autor tem alguma relação com o arquivo
+            if dl_val > 0 or fa_val == 1:
+                raw[(filepath, author)] = _compute_doa(fa_val, dl_val, ac_val)
+
+    normalized = _normalize_doa_per_file(raw)
+
+    authorship_map: dict[str, set[str]] = {f: set() for f in all_files}
+    for (filepath, author), norm_score in normalized.items():
+        if norm_score >= threshold:
+            authorship_map[filepath].add(author)
+
+    return authorship_map
