@@ -4,6 +4,13 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import DefaultDict, List
 from src.models import CommitInfo
+
+__all__ = [
+    "calculate_truck_factor_files",
+    "FileTruckFactorResult",
+    "FileAuthorshipTracker",
+    "PRIMARY_AUTHOR_THRESHOLD",
+]
     
 PRIMARY_AUTHOR_THRESHOLD = 0.75
 
