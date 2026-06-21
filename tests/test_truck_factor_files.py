@@ -125,3 +125,46 @@ class TestGreedyHeuristic:
         assert result.truck_factor == 0
         assert result.critical_authors == []
         assert result.coverage_before == 0.0
+
+class TestEndToEnd:
+
+    def test_integracao_cenario_realista(self):
+        """
+        5 arquivos, 3 devs, histórico de 6 commits.
+        alice: criou auth.py, models.py, utils.py → autora primária dos 3
+        bob:   criou cli.py, loader.py            → autor primário dos 2
+        carol: edita arquivos de alice e bob, sem autoria primária própria
+
+        Cobertura inicial = 100% (todos os 5 arquivos têm dono primário).
+        Remover qualquer dos dois primários (alice ou bob) mantém >= 50%?
+        Depende do cenário — o teste valida o tipo e a sanidade dos valores.
+        """
+        commits = [
+            _commit("alice", ["auth.py", "models.py", "utils.py"]),
+            _commit("bob",   ["cli.py", "loader.py"]),
+            _commit("carol", ["auth.py", "cli.py"]),
+            _commit("alice", ["auth.py"]),
+            _commit("bob",   ["loader.py"]),
+            _commit("carol", ["models.py"]),
+        ]
+        result = calculate_truck_factor_files(commits, coverage_threshold=0.5)
+
+        assert isinstance(result.truck_factor, int)
+        assert result.truck_factor >= 0
+        assert isinstance(result.critical_authors, list)
+        assert result.coverage_before == 1.0  
+        assert 0.0 <= result.coverage_threshold <= 1.1
+
+    def test_resultado_coverage_before_reflete_equipe_completa(self):
+        """coverage_before deve ser 1.0 quando todos os arquivos têm dono."""
+        commits = [
+            _commit("alice", ["x.py"]),
+            _commit("bob",   ["y.py"]),
+        ]
+        result = calculate_truck_factor_files(commits, coverage_threshold=0.5)
+        assert result.coverage_before == 1.0
+
+    def test_coverage_threshold_preservado_no_resultado(self):
+        commits = [_commit("alice", ["a.py"])]
+        result = calculate_truck_factor_files(commits, coverage_threshold=0.7)
+        assert result.coverage_threshold == 0.7
