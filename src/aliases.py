@@ -1,5 +1,5 @@
 from typing import List, Dict
-from src.git_loader import CommitInfo
+from src.models import CommitInfo
 
 def distancia_levenshtein(s1: str, s2: str) -> int:
     """Calcula a distância de Levenshtein entre duas strings."""

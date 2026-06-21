@@ -3,17 +3,16 @@
 This module provides small, testable helpers that extract commit
 information from a local git repository using PyDriller.
 """
-from dataclasses import dataclass
 from typing import List
 from pathlib import Path
 
+# Tente importar o Repository (PyDriller mudou a API ao longo das versões)
 try:
-    # Tenta importar a API nova (PyDriller 2.0 ou superior)
-    from pydriller import Repository # type: ignore
-except ImportError:
-    # Se falhar, faz o fallback seguro importando a classe antiga e apelidando de Repository
-    from pydriller import RepositoryMining as Repository # type: ignore
+    from pydriller import Repository  # type: ignore
+except Exception:
+    from pydriller.repository import Repository  # type: ignore
 
+from src.models import CommitInfo
 from src.aliases import unificar_autores
 
 # Conjuntos de exclusão
@@ -26,19 +25,6 @@ IGNORED_DIRECTORIES = {
     "node_modules", "vendor", "venv", ".venv", "env", 
     "dist", "build", "target", "out", "site-packages"
 }
-
-@dataclass
-class CommitInfo:
-    author: str
-    email: str
-    commit_hash: str
-    modified_files: List[str]
-
-    def __post_init__(self):
-        if not self.author:
-            self.author = "<unknown>"
-        if not self.email:
-            self.email = "<unknown>"
 
 def ignorar_arquivo(file_path: str) -> bool:
     """Verifica se um arquivo deve ser ignorado na análise."""
