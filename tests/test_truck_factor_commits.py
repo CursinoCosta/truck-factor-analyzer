@@ -74,7 +74,7 @@ class TestCalculateTruckFactorCommits:
         ]
         result = calculate_truck_factor_commits(commits, coverage_threshold=0.8)
         assert result.truck_factor == 2
-        assert result.coverage > 0.8
+        assert result.coverage >= 0.8
 
     def test_threshold_0_retorna_tf_um(self):
         """Qualquer autor já ultrapassa threshold=0: TF sempre 1."""

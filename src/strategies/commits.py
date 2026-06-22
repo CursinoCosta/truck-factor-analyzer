@@ -74,7 +74,7 @@ def calculate_truck_factor_commits(
     for author, count in ranking:
         accumulated += count
         critical_authors.append(author)
-        if accumulated / grand_total > coverage_threshold:
+        if accumulated / grand_total >= coverage_threshold:
             break
 
     coverage = accumulated / grand_total
