@@ -10,9 +10,10 @@ app = typer.Typer(help="Truck Factor Analyzer CLI")
 
 @app.command()
 def analyze(
-    repo_path: str = typer.Option(..., "--repo-path", help="Path to the git repository to analyze")
+    repo_path: str = typer.Option(..., "--repo-path", help="Path to the git repository to analyze"),
+    strategy: str = typer.Option("commits", "--strategy", help="Estimation strategy: 'commits' or 'files'"),
 ) -> None:
-    """Analyze a git repository and show author contribution stats."""
+    """Analyze a git repository and compute its Truck Factor."""
 
     repo = Path(repo_path)
 
@@ -26,17 +27,23 @@ def analyze(
         typer.echo(f"Error loading repository: {exc}")
         raise typer.Exit(code=1)
 
-    stats = compute_author_stats(commits)
+    from src.strategies.commits import calculate_truck_factor_commits
+    from src.strategies.files import calculate_truck_factor_files
 
-    if not stats:
-        typer.echo("No commits found.")
-        return
+    if strategy == "commits":
+        result = calculate_truck_factor_commits(commits)
+    elif strategy == "files":
+        result = calculate_truck_factor_files(commits)
+    else:
+        valid = ("commits", "files")
+        typer.echo(
+            f"Error: '{strategy}' is not a valid strategy.\n"
+            f"Available strategies: {', '.join(valid)}\n"
+            f"Example: --strategy commits"
+        )
+        raise typer.Exit(code=1)
 
-    sorted_stats = sort_author_stats(stats)
-
-    typer.echo("Authors:")
-    for author, count in sorted_stats:
-        typer.echo(f"{author}: {count} commits")
+    typer.echo(result)
 
 
 @app.command()
