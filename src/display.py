@@ -45,8 +45,13 @@ def render_result_panel(
     body.append(f"  Coverage:     ", style="bold white")
     body.append(f"{coverage_pct}%", style="white")
 
+    title_color = _truck_factor_color(tf)
     console.print(
-        Panel(body, title="[bold]Truck Factor Analyzer[/bold]", expand=False)
+        Panel(
+            body,
+            title=f"[{title_color}]Truck Factor Analyzer — TF {tf}[/{title_color}]",
+            expand=False,
+        )
     )
 
 

@@ -1,9 +1,8 @@
-from typing import Optional
 from pathlib import Path
+
 import typer
 
 from src.git_loader import load_commits
-from src.metrics import compute_author_stats, sort_author_stats
 
 app = typer.Typer(help="Truck Factor Analyzer CLI")
 
@@ -27,12 +26,15 @@ def analyze(
         typer.echo(f"Error loading repository: {exc}")
         raise typer.Exit(code=1)
 
-    from src.strategies.commits import calculate_truck_factor_commits
-    from src.strategies.files import calculate_truck_factor_files
+    if not commits:
+        typer.echo("No commits found.")
+        return
 
     if strategy == "commits":
+        from src.strategies.commits import calculate_truck_factor_commits
         result = calculate_truck_factor_commits(commits)
     elif strategy == "files":
+        from src.strategies.files import calculate_truck_factor_files
         result = calculate_truck_factor_files(commits)
     else:
         valid = ("commits", "files")
@@ -43,7 +45,9 @@ def analyze(
         )
         raise typer.Exit(code=1)
 
-    typer.echo(result)
+    from src.display import render_result_panel, render_authors_table
+    render_result_panel(result, strategy)
+    render_authors_table(result)
 
 
 @app.command()
