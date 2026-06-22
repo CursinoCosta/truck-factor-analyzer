@@ -106,15 +106,39 @@ Análise utilizando a estratégia baseada em commits:
 
 ```bash
 python -m src.cli analyze --repo-path <repositorio> --strategy commits
-
 ```
 
-Análise utilizando a estratégia baseada em propriedade de arquivos:
+Análise utilizando a estratégia baseada em propriedade de arquivos (DOA):
 
 ```bash
 python -m src.cli analyze --repo-path <repositorio> --strategy files
-
 ```
+
+### Campos da saída
+
+| Campo | Descrição |
+|---|---|
+| Truck Factor | Número mínimo de desenvolvedores cuja saída comprometeria o projeto |
+| Strategy | Estratégia utilizada no cálculo (`commits` ou `files`) |
+| Coverage | Fração do repositório coberta pelos autores críticos identificados |
+
+### Interpretação do resultado
+
+- **TF = 1** (vermelho): risco alto — um único desenvolvedor concentra conhecimento crítico
+- **TF 2–3** (amarelo): risco moderado
+- **TF ≥ 4** (verde): conhecimento bem distribuído entre a equipe
+
+### Estratégia `commits`
+
+Contabiliza o total de arquivos modificados por commit para cada autor.
+Ordena os autores por volume de contribuição e acumula até ultrapassar
+50% do total de modificações. O número de autores necessários é o Truck Factor.
+
+### Estratégia `files`
+
+Calcula o *Degree of Authorship* (DOA) de cada desenvolvedor em cada arquivo,
+conforme Avelino et al. (2016). Remove iterativamente o principal autor de código
+enquanto a cobertura de arquivos com dono primário permanecer acima de 50%.
 
 ## Testes
 
