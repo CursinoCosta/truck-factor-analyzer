@@ -24,5 +24,5 @@ def _count_modifications(commits: List[CommitInfo]) -> dict[str, int]:
     for commit in commits:
         author = commit.author
         count = len(commit.modified_files)
-        totals[author] = totals.get(author, 0) + 1
+        totals[author] = totals.get(author, 0) + count
     return totals
