@@ -102,16 +102,22 @@ pip install -r requirements.txt
 
 ## Uso
 
+Antes de utilizar uma das estratégias, é necessário clonar o repositório a ser analisado:
+
+```bash
+git clone <link do repositorio>
+```
+
 Análise utilizando a estratégia baseada em commits:
 
 ```bash
-python -m src.cli analyze --repo-path <repositorio> --strategy commits
+python -m src.cli analyze --repo-path <pasta do repositorio> --strategy commits
 ```
 
 Análise utilizando a estratégia baseada em propriedade de arquivos (DOA):
 
 ```bash
-python -m src.cli analyze --repo-path <repositorio> --strategy files
+python -m src.cli analyze --repo-path <pasta do repositorio> --strategy files
 ```
 
 ### Campos da saída
